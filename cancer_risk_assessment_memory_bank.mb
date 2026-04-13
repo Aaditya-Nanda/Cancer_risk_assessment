@@ -1,0 +1,455 @@
+MEMORY BANK
+Project: cancer_risk_assessment
+Created: 2026-04-12
+
+1. What this project is about
+
+This project is a machine learning app that tries to predict whether a person falls into a Low, Medium, or High cancer risk category based on health, lifestyle, and symptom inputs.
+
+In simple words:
+- You give the system details like age, smoking level, air pollution exposure, fatigue, chest pain, and similar factors.
+- The system runs those values through trained machine learning models.
+- It returns a risk category and confidence scores.
+
+This is not a medical diagnosis tool. It is a learning/demo project that shows how to build a full ML pipeline and a simple frontend around it.
+
+
+2. Big-picture purpose
+
+The project is built to show the full journey of an ML product:
+- getting data ready,
+- cleaning and splitting it,
+- training models,
+- comparing model performance,
+- saving trained artifacts,
+- and serving predictions through a Streamlit web app.
+
+So this is not just "a model file". It is a complete mini ML system.
+
+
+3. Tech stack
+
+Main language:
+- Python
+
+Libraries used:
+- pandas: table/data handling
+- numpy: numeric operations
+- scikit-learn: preprocessing, model tuning, metrics, train/test split
+- xgboost: gradient boosting model
+- imbalanced-learn: SMOTE and SMOTEENN for class imbalance handling
+- matplotlib: plotting graphs
+- seaborn: confusion matrix visuals
+- streamlit: frontend app/UI
+- pyyaml: reading config files
+
+Project style:
+- config-driven ML pipeline
+- saved artifacts via pickle
+- Streamlit UI for prediction and comparison
+- basic test file with pytest
+
+
+4. How this project likely started
+
+Based on the repository structure and scripts, the project appears to have started as a classic ML portfolio pipeline:
+- choose a cancer-risk dataset,
+- define a fixed set of input features,
+- build training steps as separate modules,
+- add hyperparameter tuning,
+- save models and plots,
+- then wrap it with a Streamlit app.
+
+There is also a separate script to generate a more realistic synthetic dataset. That suggests the author probably noticed the original dataset was too easy or too synthetic, and then tried to make the problem less trivial.
+
+There is another script to inject extra noise into a dataset. That also suggests the project evolved from "basic ML demo" into "slightly more realistic ML demo".
+
+
+5. How I inspected the project
+
+My thinking process during the walkthrough:
+- First, I checked the repository structure to find the main entry points.
+- Then I read the README, app entry point, pipeline orchestrator, and tests.
+- After that, I traced the training flow module by module:
+  data ingestion -> preprocessing -> model training -> evaluation -> prediction pipeline.
+- Then I checked config files to see how behavior is controlled.
+- Then I checked saved artifacts to confirm the project had already been run at least once.
+- Finally, I tried to run tests to verify the current environment, but the local virtual environment is broken because it points to a missing Python 3.11 install.
+
+This means the code walkthrough is reliable, but live verification from the current venv is blocked until the environment is repaired.
+
+
+6. High-level system flow
+
+The main training flow is:
+
+Step 1:
+- Load raw CSV data.
+- Drop unwanted ID/index columns.
+- Validate that expected columns are present.
+- Split into train, validation, and test CSV files.
+
+Step 2:
+- Separate features and target.
+- Encode the target labels:
+  Low -> 0
+  Medium -> 1
+  High -> 2
+- Impute missing values with median.
+- Scale numeric values.
+- Handle class imbalance using SMOTE or SMOTEENN.
+- Save the scaler and imputer.
+
+Step 3:
+- Train two models:
+  XGBoost
+  Random Forest
+- Tune both using RandomizedSearchCV.
+- Save both trained models.
+
+Step 4:
+- Evaluate both models on the test set.
+- Save:
+  classification reports,
+  confusion matrix images,
+  ROC curve images,
+  model comparison CSV.
+
+Step 5:
+- The Streamlit app loads the saved artifacts.
+- User enters patient values in the sidebar.
+- App runs prediction using both models.
+- App displays:
+  risk label,
+  confidence,
+  class probabilities,
+  agreement/disagreement between models,
+  comparison plots and metrics.
+
+
+7. Repository structure and what is done where
+
+Top level:
+
+- README.md
+  Basic usage guide for setup, pipeline run, and Streamlit app run.
+
+- app.py
+  Streamlit frontend.
+  This is the user-facing app for prediction and model comparison.
+
+- setup.py
+  Packaging metadata.
+
+- requirements.txt
+  Pinned dependencies.
+
+- generate_dataset.py
+  Creates a larger synthetic dataset with more realistic distributions, class overlap, and missing values.
+
+- add_noise.py
+  Adds noise, label flips, and outliers to the raw dataset.
+
+- check_data.py
+  Very small helper script for quickly looking at the raw data.
+
+
+config folder:
+
+- config/config.yaml
+  Main project settings such as paths, train/test split sizes, scaler choice, target column, and imbalance strategy.
+
+- config/params.yaml
+  Hyperparameter search spaces and training options for XGBoost and Random Forest.
+
+
+data folder:
+
+- data/raw/
+  Raw input dataset lives here.
+
+- data/processed/
+  Train/validation/test CSV files are written here after data ingestion.
+
+
+src folder:
+
+- src/pipeline.py
+  Main end-to-end orchestrator.
+  This is the file that ties together ingestion, preprocessing, training, and evaluation.
+
+- src/data_ingestion.py
+  Reads raw data, cleans it, validates schema, and creates train/val/test splits.
+
+- src/preprocessing.py
+  Handles label encoding, imputation, scaling, imbalance treatment, and saving preprocessors.
+
+- src/model_trainer.py
+  Trains and tunes XGBoost and Random Forest using RandomizedSearchCV.
+
+- src/model_evaluation.py
+  Evaluates trained models and saves metrics/plots.
+
+- src/prediction_pipeline.py
+  Loads saved artifacts and performs live inference for single or batch prediction.
+
+- src/utils.py
+  Shared helper utilities:
+  YAML loading, pickle save/load, label mapping, directory creation.
+
+- src/logger.py
+  Shared logging setup.
+
+- src/exception.py
+  Custom project exception wrapper.
+
+
+tests folder:
+
+- tests/test_pipeline.py
+  Basic unit/smoke tests for utilities, preprocessing, and prediction pipeline behavior.
+  One trainer smoke test is weak and does not truly test training.
+
+
+artifacts folder:
+
+- artifacts/models/
+  Saved trained model files.
+
+- artifacts/preprocessors/
+  Saved scaler and imputer.
+
+- artifacts/reports/
+  Model comparison CSV and JSON classification reports.
+
+- artifacts/plots/
+  Confusion matrices and ROC curve images.
+
+
+logs folder:
+
+- logs/
+  Run logs generated by the logger setup.
+
+
+8. Main entry points
+
+Training pipeline:
+- python -m src.pipeline
+
+Frontend app:
+- streamlit run app.py
+
+Standalone dataset generation:
+- python generate_dataset.py
+
+Standalone noise injection:
+- python add_noise.py
+
+
+9. Important files and their roles in plain language
+
+src/pipeline.py
+- This is the "manager" file.
+- It calls the right modules in the right order.
+
+src/data_ingestion.py
+- This is the "data intake and sorting" step.
+- It makes sure the incoming file is shaped correctly before training starts.
+
+src/preprocessing.py
+- This is the "make the data machine-ready" step.
+- It fills missing values, scales the numbers, and handles imbalance.
+
+src/model_trainer.py
+- This is the "teach the models" step.
+- It trains two different models and searches for good parameter settings.
+
+src/model_evaluation.py
+- This is the "score the models" step.
+- It tells you how good each model is after training.
+
+src/prediction_pipeline.py
+- This is the "use trained models for real input" step.
+- It is what the app depends on when making predictions.
+
+app.py
+- This is the "face of the project".
+- It lets a user interact with the ML system without needing to touch code.
+
+
+10. What the app does
+
+The Streamlit app does three main things:
+
+Prediction tab:
+- user enters patient-related values,
+- app predicts with both XGBoost and Random Forest,
+- app shows risk label, confidence, and class probabilities,
+- app tells whether both models agree.
+
+Model comparison tab:
+- reads saved evaluation report CSV,
+- shows metric table,
+- shows confusion matrices and ROC plots if present.
+
+About tab:
+- explains dataset, models, imbalance handling, evaluation method, and disclaimer.
+
+There is also a demo mode:
+- if trained artifacts do not exist, the app still works with mock predictions.
+
+
+11. What data the system expects
+
+The project expects a set of fixed numeric features such as:
+- Age
+- Gender
+- Air Pollution
+- Alcohol use
+- Dust Allergy
+- Occupational Hazards
+- Genetic Risk
+- chronic Lung Disease
+- Balanced Diet
+- Obesity
+- Smoking
+- Passive Smoker
+- Chest Pain
+- Coughing of Blood
+- Fatigue
+- Weight Loss
+- Shortness of Breath
+- Wheezing
+- Swallowing Difficulty
+- Clubbing of Finger Nails
+- Frequent Cold
+- Dry Cough
+- Snoring
+
+Target column:
+- Level
+
+Predicted output:
+- Low
+- Medium
+- High
+
+
+12. What has already been done in this repo
+
+This repository is not empty or half-started. It already contains:
+- processed train/val/test datasets,
+- trained model files,
+- saved scaler and imputer,
+- saved evaluation reports,
+- saved plots,
+- logs from past runs.
+
+So the pipeline has already been executed before.
+
+Saved comparison report currently shows:
+- XGBoost:
+  accuracy 0.7885
+  weighted F1 0.7905
+  weighted ROC-AUC 0.9278
+- Random Forest:
+  accuracy 0.7538
+  weighted F1 0.7531
+  weighted ROC-AUC 0.9052
+
+Current takeaway:
+- XGBoost is the better-performing model in the saved results.
+
+
+13. Strengths of the project
+
+- Clear modular structure
+- Separate training, evaluation, and inference code
+- Config files control paths and search spaces
+- Saves useful artifacts and visual reports
+- Has a simple UI, not just notebook code
+- Supports class imbalance handling
+- Includes synthetic data generation helpers
+
+
+14. Issues and gaps found during inspection
+
+Issue 1: Missing-value handling is inconsistent
+- generate_dataset.py intentionally injects missing values.
+- But data_ingestion.py drops all rows with missing values before preprocessing.
+- That makes the imputer in preprocessing less useful than intended.
+
+Issue 2: Validation split is created but not really used
+- The project creates train, validation, and test sets.
+- But validation data is transformed and then ignored.
+- Actual model selection is done through cross-validation inside RandomizedSearchCV.
+
+Issue 3: App readiness check is incomplete
+- app.py checks for both model files and scaler.pkl.
+- But prediction_pipeline.py also requires imputer.pkl.
+- So the app can think it is ready even if one required artifact is missing.
+
+Issue 4: Trainer test is weak
+- The trainer smoke test does not truly run a training cycle.
+- It mostly confirms the object exists.
+
+Issue 5: Environment is currently broken
+- The local virtual environment points to a missing Python 3.11 runtime.
+- Because of that, pytest could not be executed successfully from the current venv.
+
+
+15. Current environment note
+
+I tried to verify the project by running tests, but the environment has a broken Python path:
+- venv/Scripts/python.exe points to a missing Python 3.11 installation
+
+So the code review and repo walkthrough were completed successfully, but full runtime verification is blocked until the environment is repaired or the venv is recreated.
+
+
+16. Recommended next steps
+
+Best next fixes:
+- Repair or recreate the virtual environment
+- Run pytest and the full pipeline again
+- Decide whether to keep missing values and let the imputer handle them, or keep dropping rows but remove unnecessary imputation logic
+- Either use the validation split properly or remove it from the pipeline
+- Strengthen tests, especially model training and prediction path tests
+- Make app readiness check include imputer.pkl
+
+
+17. Short layman summary
+
+If explained to a non-technical person:
+
+"This project is a cancer-risk prediction demo app. It takes health and lifestyle inputs, uses two trained AI/ML models to estimate risk level, compares the models, and shows the result in a simple web interface. Behind the scenes, it includes the full process of preparing data, training models, saving them, and using them later for predictions."
+
+
+18. Final memory snapshot
+
+Project type:
+- end-to-end ML application
+
+Problem type:
+- multiclass classification
+
+Classes:
+- Low, Medium, High
+
+Best saved model:
+- XGBoost
+
+Frontend:
+- Streamlit
+
+Training flow:
+- ingestion -> preprocessing -> tuning/training -> evaluation -> artifact save
+
+Inference flow:
+- load scaler/imputer/models -> prepare user input -> predict -> display in app
+
+Verification status:
+- source walkthrough complete
+- artifact inspection complete
+- runtime test execution blocked by broken venv
+

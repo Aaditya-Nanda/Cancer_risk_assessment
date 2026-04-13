@@ -1,0 +1,61 @@
+[2026-04-11 18:34:25] INFO — __main__ — ======================================================================
+[2026-04-11 18:34:25] INFO — __main__ — CANCER RISK ASSESSMENT — TRAINING PIPELINE START
+[2026-04-11 18:34:25] INFO — __main__ — ======================================================================
+[2026-04-11 18:34:25] INFO — __main__ — 
+[1/4] Data Ingestion
+[2026-04-11 18:34:25] INFO — src.utils — YAML loaded: config/config.yaml
+[2026-04-11 18:34:25] INFO — src.data_ingestion — Loading raw data from: data/raw/cancer_patient_data.csv
+[2026-04-11 18:34:25] INFO — src.data_ingestion — Loaded shape: (5000, 24)
+[2026-04-11 18:34:25] INFO — src.data_ingestion — Shape after cleaning: (4606, 24)
+[2026-04-11 18:34:25] INFO — src.data_ingestion — Split sizes — train: 3223, val: 461, test: 922
+[2026-04-11 18:34:25] INFO — __main__ — 
+[2/4] Preprocessing + Imbalance Handling
+[2026-04-11 18:34:25] INFO — src.utils — YAML loaded: config/config.yaml
+[2026-04-11 18:34:25] INFO — src.utils — YAML loaded: config/params.yaml
+[2026-04-11 18:34:25] INFO — src.preprocessing — Class distribution before resampling:
+0    1605
+1    1027
+2     591
+Name: count, dtype: int64
+[2026-04-11 18:34:25] INFO — src.preprocessing — Applying SMOTEENN …
+[2026-04-11 18:34:27] INFO — src.preprocessing — Resampled shape: (2929, 23)
+[2026-04-11 18:34:27] INFO — src.preprocessing — Class distribution after resampling:
+2    1391
+1     835
+0     703
+Name: count, dtype: int64
+[2026-04-11 18:34:27] INFO — __main__ — 
+[3/4] Model Training (XGBoost + Random Forest)
+[2026-04-11 18:34:27] INFO — src.utils — YAML loaded: config/config.yaml
+[2026-04-11 18:34:27] INFO — src.utils — YAML loaded: config/params.yaml
+[2026-04-11 18:34:27] INFO — src.model_trainer — ============================================================
+[2026-04-11 18:34:27] INFO — src.model_trainer — Training XGBoost …
+[2026-04-11 18:35:06] INFO — src.model_trainer — [xgboost] Best CV f1_weighted: 0.9471
+[2026-04-11 18:35:06] INFO — src.model_trainer — [xgboost] Best params: {'subsample': 0.7, 'reg_lambda': 1, 'reg_alpha': 0.5, 'n_estimators': 300, 'max_depth': 7, 'learning_rate': 0.1, 'colsample_bytree': 1.0}
+[2026-04-11 18:35:06] INFO — src.model_trainer — [xgboost] Training time: 39.4s
+[2026-04-11 18:35:06] INFO — src.model_trainer — ============================================================
+[2026-04-11 18:35:06] INFO — src.model_trainer — Training Random Forest …
+[2026-04-11 18:35:27] INFO — src.model_trainer — [random_forest] Best CV f1_weighted: 0.9329
+[2026-04-11 18:35:27] INFO — src.model_trainer — [random_forest] Best params: {'n_estimators': 200, 'min_samples_split': 5, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'max_depth': 30, 'bootstrap': False}
+[2026-04-11 18:35:27] INFO — src.model_trainer — [random_forest] Training time: 21.1s
+[2026-04-11 18:35:27] INFO — src.model_trainer — ============================================================
+[2026-04-11 18:35:28] INFO — __main__ — 
+[4/4] Model Evaluation on Test Set
+[2026-04-11 18:35:28] INFO — src.utils — YAML loaded: config/config.yaml
+[2026-04-11 18:35:28] INFO — src.utils — YAML loaded: config/params.yaml
+[2026-04-11 18:35:28] INFO — src.model_evaluation — [xgboost] Accuracy: 0.7885 | F1(w): 0.7905 | ROC-AUC: 0.9278
+[2026-04-11 18:35:29] INFO — src.model_evaluation — [random_forest] Accuracy: 0.7538 | F1(w): 0.7531 | ROC-AUC: 0.9052
+[2026-04-11 18:35:29] INFO — src.model_evaluation — 
+               accuracy  f1_weighted  roc_auc_weighted
+model                                                 
+xgboost          0.7885       0.7905            0.9278
+random_forest    0.7538       0.7531            0.9052
+[2026-04-11 18:35:29] INFO — __main__ — ======================================================================
+[2026-04-11 18:35:29] INFO — __main__ — PIPELINE COMPLETE  —  Total time: 64.1s
+[2026-04-11 18:35:29] INFO — __main__ — ======================================================================
+[2026-04-11 18:35:29] INFO — __main__ — 
+Model Comparison:
+               accuracy  f1_weighted  roc_auc_weighted
+model                                                 
+xgboost          0.7885       0.7905            0.9278
+random_forest    0.7538       0.7531            0.9052

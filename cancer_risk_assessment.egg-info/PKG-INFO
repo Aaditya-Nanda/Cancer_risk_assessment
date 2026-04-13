@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: cancer_risk_assessment
+Version: 1.0.0
+Summary: Cancer Risk Assessment — ML Pipeline
+Author: Your Name
+Requires-Python: >=3.10
+Requires-Dist: pandas>=2.0
+Requires-Dist: numpy>=1.24
+Requires-Dist: scikit-learn>=1.4
+Requires-Dist: xgboost>=2.0
+Requires-Dist: imbalanced-learn>=0.12
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: seaborn>=0.13
+Requires-Dist: streamlit>=1.35
+Requires-Dist: pyyaml>=6.0
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

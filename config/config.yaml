@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────
+#  Cancer Risk Assessment — Master Config
+# ─────────────────────────────────────────────
+
+project:
+  name: cancer_risk_assessment
+  version: "1.0.0"
+  random_state: 42
+  target_column: Level
+  class_labels: ["Low", "Medium", "High"]
+
+paths:
+  raw_data:       data/raw/cancer_patient_data.csv
+  processed_data: data/processed/
+  features_data:  data/features/
+  artifacts:      artifacts/
+  models:         artifacts/models/
+  preprocessors:  artifacts/preprocessors/
+  reports:        artifacts/reports/
+  plots:          artifacts/plots/
+  logs:           logs/
+
+data:
+  test_size:  0.20
+  val_size:   0.10        # fraction of remaining train set
+  stratify:   true
+
+preprocessing:
+  scaler: standard          # options: standard | minmax | robust
+  encoding: label           # options: label | onehot
+  drop_columns:
+    - index
+    - Patient Id
+
+imbalance:
+  strategy: smoteenn        # options: smote | smoteenn | none
+  smote_k_neighbors: 5
+  sampling_strategy: auto
+
+features:
+  selection: all            # options: all | importance_threshold
+  importance_threshold: 0.01

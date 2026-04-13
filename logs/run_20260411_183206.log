@@ -1,0 +1,3 @@
+[2026-04-11 18:32:06] INFO — src.utils — YAML loaded: config/config.yaml
+[2026-04-11 18:32:06] INFO — src.utils — YAML loaded: config/params.yaml
+[2026-04-11 18:32:09] INFO — src.prediction_pipeline — PredictionPipeline initialised — scaler + 2 models loaded.
